@@ -269,8 +269,8 @@ export default function App() {
     const pricePer100 = (1 - ((drNum / 100) * tenor) / daysInYear) * 100;
 
     setConsideration(`₦${purchasePrice.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
-    setPrice(`₦${pricePer100.toFixed(4)}`);
-    setYieldVal(`${effectiveYield.toFixed(4)}%`);
+    setPrice(`₦${pricePer100.toFixed(6)}`);
+    setYieldVal(`${effectiveYield.toFixed(6)}%`);
   }, [faceValue, discountRate, tenorText, settlementDate]);
 
   // --- Handlers ---
@@ -328,7 +328,8 @@ export default function App() {
   const handleDiscountRateBlur = () => {
     const val = parseFloat(discountRate);
     if (!isNaN(val)) {
-      setDiscountRate(val.toFixed(2));
+      // Keep up to 6 decimal places, removing unnecessary trailing zeros
+      setDiscountRate(parseFloat(val.toFixed(6)).toString());
     }
   };
 
