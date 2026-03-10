@@ -370,21 +370,21 @@ export default function App() {
 
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
-      <header className="header-bg text-white p-3 md:p-4 shadow-md sticky top-0 z-50">
-        <div className="container mx-auto flex items-center gap-3">
-          <img src="/favicon.png" alt="Logo" className="h-10 md:h-12 w-auto rounded shadow-sm" referrerPolicy="no-referrer" />
-          <h1 className="text-lg md:text-2xl font-bold leading-tight">Naija Bill Calculator</h1>
+      <header className="header-bg text-white p-2 md:p-3 shadow-md">
+        <div className="container mx-auto flex items-center gap-3 md:justify-center">
+          <img src="/favicon.png" alt="Logo" className="h-8 md:h-10 w-auto rounded" referrerPolicy="no-referrer" />
+          <h1 className="text-lg md:text-xl font-bold">Nigerian Treasury Bill (T-Bill) Calculator</h1>
         </div>
       </header>
 
-      <main className="container mx-auto px-3 py-4 md:py-8">
-        <div className="flex justify-center">
-          <div className="w-full max-w-md">
-            <div className="bg-white p-5 md:p-8 rounded-2xl shadow-xl border border-gray-100">
-              <div className="space-y-5">
+      <main className="container mx-auto px-4 pb-4 pt-2">
+        <div className="grid grid-cols-1 justify-items-center">
+          <div className="w-full max-w-[28rem]">
+            <div className="bg-white px-4 sm:px-6 py-2.5 rounded-lg shadow-md">
+              <div className="grid grid-cols-1 gap-3">
                 {/* Face Value */}
-                <div className="space-y-1.5">
-                  <label htmlFor="faceValue" className="block text-sm font-semibold text-gray-600 uppercase tracking-wider">Face Value (₦)</label>
+                <div>
+                  <label htmlFor="faceValue" className="block text-sm font-medium text-gray-700">Face Value (₦)</label>
                   <input
                     ref={faceValueRef}
                     type="text"
@@ -394,15 +394,15 @@ export default function App() {
                     onChange={handleFaceValueInput}
                     onBlur={handleFaceValueBlur}
                     onKeyDown={(e) => e.key === 'Enter' && tenorInputRef.current?.focus()}
-                    className="block w-full h-12 px-4 bg-gray-50 border border-gray-200 rounded-xl shadow-sm transition-all focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none text-lg"
-                    placeholder="e.g., 1b or 10,000,000"
+                    className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
+                    placeholder="e.g., 1b or 1e9 or 1,000,000,000.00"
                   />
                 </div>
 
                 {/* Tenor / Maturity */}
-                <div className="space-y-1.5">
-                  <label htmlFor="tenorInput" className="block text-sm font-semibold text-gray-600 uppercase tracking-wider">Maturity Date</label>
-                  <div className="relative">
+                <div>
+                  <label htmlFor="tenorInput" className="block text-sm font-medium text-gray-700">Select NTB or OMO maturity</label>
+                  <div className="relative mt-1">
                     <input
                       ref={tenorInputRef}
                       type="text"
@@ -411,18 +411,20 @@ export default function App() {
                       value={tenorText}
                       onChange={(e) => setTenorText(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && discountRateRef.current?.focus()}
-                      className="block w-full h-12 pl-4 pr-10 bg-gray-50 border border-gray-200 rounded-xl shadow-sm transition-all focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none text-lg"
-                      placeholder="Search NTB or OMO..."
+                      className={`block w-full pl-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
+                        tenorText.length > 0 ? 'pr-[140px] md:pr-[225px]' : 'pr-10'
+                      }`}
+                      placeholder="Type to search for a maturity..."
                     />
                     
                     {tenorText.length > 0 && (
                       <button
                         type="button"
                         onClick={clearTenor}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 p-2 rounded-full hover:bg-gray-200 transition-colors"
+                        className="absolute right-[140px] md:right-[225px] top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-500 focus:outline-none p-1 rounded-full hover:bg-gray-100 transition-colors"
                         title="Clear selection"
                       >
-                        <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                         </svg>
                       </button>
@@ -436,8 +438,8 @@ export default function App() {
                 </div>
 
                 {/* Discount Rate */}
-                <div className="space-y-1.5">
-                  <label htmlFor="discountRate" className="block text-sm font-semibold text-gray-600 uppercase tracking-wider">Discount Rate (%)</label>
+                <div>
+                  <label htmlFor="discountRate" className="block text-sm font-medium text-gray-700">Discount Rate (%)</label>
                   <input
                     ref={discountRateRef}
                     type="text"
@@ -447,14 +449,14 @@ export default function App() {
                     onChange={(e) => setDiscountRate(e.target.value)}
                     onBlur={handleDiscountRateBlur}
                     onKeyDown={(e) => e.key === 'Enter' && settlementDateRef.current?.focus()}
-                    className="block w-full h-12 px-4 bg-gray-50 border border-gray-200 rounded-xl shadow-sm transition-all focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none text-lg"
-                    placeholder="e.g., 18.50"
+                    className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
+                    placeholder="e.g., 15.3"
                   />
                 </div>
 
                 {/* Settlement Date */}
-                <div className="space-y-1.5">
-                  <label htmlFor="settlementDate" className="block text-sm font-semibold text-gray-600 uppercase tracking-wider">Settlement Date</label>
+                <div>
+                  <label htmlFor="settlementDate" className="block text-sm font-medium text-gray-700">Settlement Date</label>
                   <input
                     ref={settlementDateRef}
                     type={settlementDateType}
@@ -464,41 +466,54 @@ export default function App() {
                     onFocus={handleSettlementFocus}
                     onBlur={handleSettlementBlur}
                     onKeyDown={(e) => e.key === 'Enter' && settlementDateRef.current?.blur()}
-                    className="block w-full h-12 px-4 bg-gray-50 border border-gray-200 rounded-xl shadow-sm transition-all focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none text-lg"
+                    className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                    placeholder="dd mmm yyyy"
                   />
                 </div>
 
-                <hr className="border-gray-100 my-2" />
-
-                {/* Results Grid */}
-                <div className="grid grid-cols-1 gap-4 pt-2">
-                  <div className="bg-green-50 p-4 rounded-xl border border-green-100">
-                    <label className="block text-xs font-bold text-green-700 uppercase tracking-widest mb-1">Consideration</label>
-                    <div className="text-xl font-bold text-green-900 truncate">{consideration || "₦0.00"}</div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-blue-50 p-3 rounded-xl border border-blue-100">
-                      <label className="block text-[10px] font-bold text-blue-700 uppercase tracking-widest mb-1">Yield</label>
-                      <div className="text-sm font-bold text-blue-900">{yieldVal || "0.00%"}</div>
-                    </div>
-                    <div className="bg-purple-50 p-3 rounded-xl border border-purple-100">
-                      <label className="block text-[10px] font-bold text-purple-700 uppercase tracking-widest mb-1">Tenor</label>
-                      <div className="text-sm font-bold text-purple-900">{tenorDays || "0 Days"}</div>
-                    </div>
-                  </div>
-
-                  <div className="bg-orange-50 p-3 rounded-xl border border-orange-100">
-                    <label className="block text-[10px] font-bold text-orange-700 uppercase tracking-widest mb-1">Price per ₦100</label>
-                    <div className="text-sm font-bold text-orange-900">{price || "₦0.00"}</div>
-                  </div>
+                {/* Results */}
+                <div>
+                  <label htmlFor="considerationCalculated" className="block text-sm font-medium text-gray-700">Consideration (₦)</label>
+                  <input
+                    type="text"
+                    id="considerationCalculated"
+                    value={consideration}
+                    className="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm"
+                    disabled
+                  />
+                </div>
+                <div>
+                  <label htmlFor="yieldCalculated" className="block text-sm font-medium text-gray-700">Yield (%)</label>
+                  <input
+                    type="text"
+                    id="yieldCalculated"
+                    value={yieldVal}
+                    className="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm"
+                    disabled
+                  />
+                </div>
+                <div>
+                  <label htmlFor="tenorCalculated" className="block text-sm font-medium text-gray-700">Tenor (days)</label>
+                  <input
+                    type="text"
+                    id="tenorCalculated"
+                    value={tenorDays}
+                    className="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm"
+                    disabled
+                  />
+                </div>
+                <div>
+                  <label htmlFor="priceCalculated" className="block text-sm font-medium text-gray-700">Price (per ₦100)</label>
+                  <input
+                    type="text"
+                    id="priceCalculated"
+                    value={price}
+                    className="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm"
+                    disabled
+                  />
                 </div>
               </div>
             </div>
-            
-            <p className="text-center text-gray-400 text-xs mt-6 px-4">
-              Calculations are based on a 365/366 day count convention.
-            </p>
           </div>
         </div>
       </main>
