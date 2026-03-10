@@ -370,14 +370,7 @@ export default function App() {
 
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
-      <header className="header-bg text-white p-2 md:p-3 shadow-md">
-        <div className="container mx-auto flex items-center gap-3 md:justify-center">
-          <img src="/favicon.png" alt="Logo" className="h-8 md:h-10 w-auto rounded" referrerPolicy="no-referrer" />
-          <h1 className="text-lg md:text-xl font-bold">Nigerian Treasury Bill (T-Bill) Calculator</h1>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 pb-4 pt-2">
+      <main className="container mx-auto px-4 pb-4 pt-4">
         <div className="grid grid-cols-1 justify-items-center">
           <div className="w-full max-w-[28rem]">
             <div className="bg-white px-4 sm:px-6 py-2.5 rounded-lg shadow-md">
