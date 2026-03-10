@@ -1,0 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+.header-bg {
+  background: linear-gradient(to right, #00522E, #006400);
+}
+
+/* Hide the default datalist dropdown arrow */
+#tenorInput::-webkit-calendar-picker-indicator {
+  display: none !important;
+  opacity: 0;
+}

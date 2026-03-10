@@ -1,0 +1,5 @@
+{
+  "name": "Naija Bill Calculator",
+  "description": "A modern Nigerian Treasury Bill (T-Bill) calculator to estimate discounts, yields, and returns on investment.",
+  "requestFramePermissions": []
+}
