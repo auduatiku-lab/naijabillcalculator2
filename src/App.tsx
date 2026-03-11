@@ -292,7 +292,7 @@ export default function App() {
                     ref={faceValueRef}
                     type="text"
                     id="faceValue"
-                    inputMode="numeric"
+                    inputMode="text"
                     value={faceValue}
                     onChange={handleFaceValueInput}
                     onBlur={handleFaceValueBlur}
