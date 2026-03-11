@@ -171,7 +171,7 @@ export default function App() {
     const effectiveYield = ((discountAmount / purchasePrice) * (daysInYear / tenor)) * 100;
     const pricePer100 = (1 - ((drNum / 100) * tenor) / daysInYear) * 100;
 
-    setConsideration(`₦${purchasePrice.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+    setConsideration(purchasePrice.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
     setPrice(`₦${pricePer100.toFixed(6)}`);
     setYieldVal(`${effectiveYield.toFixed(6)}%`);
   }, [faceValue, discountRate, tenorText, settlementDate]);
@@ -229,11 +229,17 @@ export default function App() {
   };
 
   const handleDiscountRateBlur = () => {
-    const val = parseFloat(discountRate);
+    const cleanVal = discountRate.replace('%', '');
+    const val = parseFloat(cleanVal);
     if (!isNaN(val)) {
       // Keep up to 6 decimal places, removing unnecessary trailing zeros
-      setDiscountRate(parseFloat(val.toFixed(6)).toString());
+      const formatted = parseFloat(val.toFixed(6)).toString();
+      setDiscountRate(formatted + '%');
     }
+  };
+
+  const handleDiscountRateFocus = () => {
+    setDiscountRate(discountRate.replace('%', ''));
   };
 
   const handleSettlementFocus = () => {
@@ -343,7 +349,13 @@ export default function App() {
                     id="discountRate"
                     inputMode="decimal"
                     value={discountRate}
-                    onChange={(e) => setDiscountRate(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/%/g, '');
+                      if (!isNaN(Number(val)) || val === '' || val === '.') {
+                        setDiscountRate(val);
+                      }
+                    }}
+                    onFocus={handleDiscountRateFocus}
                     onBlur={handleDiscountRateBlur}
                     onKeyDown={(e) => e.key === 'Enter' && settlementDateRef.current?.focus()}
                     className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
