@@ -410,6 +410,13 @@ export default function App() {
                   />
                 </div>
               </div>
+
+              {/* Footer */}
+              <div className="mt-6 pt-4 border-t border-gray-100 text-center">
+                <p className="text-[10px] text-gray-400 uppercase tracking-widest font-medium">
+                  © 2025 All rights reserved. Vega Securities Limited
+                </p>
+              </div>
             </div>
           </div>
         </div>
