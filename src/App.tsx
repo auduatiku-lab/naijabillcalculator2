@@ -6,136 +6,37 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 
 // --- Constants & Helpers ---
-const MATURITY_INVENTORY = [
-  { value: "14 Oct 2025 OMO", dateStr: "2025-10-14" },
-  { value: "16 Oct 2025 NTB", dateStr: "2025-10-16" },
-  { value: "21 Oct 2025 OMO", dateStr: "2025-10-21" },
-  { value: "23 Oct 2025 NTB", dateStr: "2025-10-23" },
-  { value: "28 Oct 2025 OMO", dateStr: "2025-10-28" },
-  { value: "30 Oct 2025 NTB", dateStr: "2025-10-30" },
-  { value: "4 Nov 2025 OMO", dateStr: "2025-11-04" },
-  { value: "6 Nov 2025 NTB", dateStr: "2025-11-06" },
-  { value: "11 Nov 2025 OMO", dateStr: "2025-11-11" },
-  { value: "13 Nov 2025 NTB", dateStr: "2025-11-13" },
-  { value: "18 Nov 2025 OMO", dateStr: "2025-11-18" },
-  { value: "20 Nov 2025 NTB", dateStr: "2025-11-20" },
-  { value: "25 Nov 2025 OMO", dateStr: "2025-11-25" },
-  { value: "27 Nov 2025 NTB", dateStr: "2025-11-27" },
-  { value: "2 Dec 2025 OMO", dateStr: "2025-12-02" },
-  { value: "4 Dec 2025 NTB", dateStr: "2025-12-04" },
-  { value: "9 Dec 2025 OMO", dateStr: "2025-12-09" },
-  { value: "11 Dec 2025 NTB", dateStr: "2025-12-11" },
-  { value: "16 Dec 2025 OMO", dateStr: "2025-12-16" },
-  { value: "18 Dec 2025 NTB", dateStr: "2025-12-18" },
-  { value: "23 Dec 2025 OMO", dateStr: "2025-12-23" },
-  { value: "25 Dec 2025 NTB", dateStr: "2025-12-25" },
-  { value: "30 Dec 2025 OMO", dateStr: "2025-12-30" },
-  { value: "1 Jan 2026 NTB", dateStr: "2026-01-01" },
-  { value: "6 Jan 2026 OMO", dateStr: "2026-01-06" },
-  { value: "8 Jan 2026 NTB", dateStr: "2026-01-08" },
-  { value: "13 Jan 2026 OMO", dateStr: "2026-01-13" },
-  { value: "15 Jan 2026 NTB", dateStr: "2026-01-15" },
-  { value: "20 Jan 2026 OMO", dateStr: "2026-01-20" },
-  { value: "22 Jan 2026 NTB", dateStr: "2026-01-22" },
-  { value: "27 Jan 2026 OMO", dateStr: "2026-01-27" },
-  { value: "29 Jan 2026 NTB", dateStr: "2026-01-29" },
-  { value: "3 Feb 2026 OMO", dateStr: "2026-02-03" },
-  { value: "5 Feb 2026 NTB", dateStr: "2026-02-05" },
-  { value: "10 Feb 2026 OMO", dateStr: "2026-02-10" },
-  { value: "12 Feb 2026 NTB", dateStr: "2026-02-12" },
-  { value: "17 Feb 2026 OMO", dateStr: "2026-02-17" },
-  { value: "19 Feb 2026 NTB", dateStr: "2026-02-19" },
-  { value: "24 Feb 2026 OMO", dateStr: "2026-02-24" },
-  { value: "26 Feb 2026 NTB", dateStr: "2026-02-26" },
-  { value: "3 Mar 2026 OMO", dateStr: "2026-03-03" },
-  { value: "5 Mar 2026 NTB", dateStr: "2026-03-05" },
-  { value: "10 Mar 2026 OMO", dateStr: "2026-03-10" },
-  { value: "12 Mar 2026 NTB", dateStr: "2026-03-12" },
-  { value: "17 Mar 2026 OMO", dateStr: "2026-03-17" },
-  { value: "19 Mar 2026 NTB", dateStr: "2026-03-19" },
-  { value: "24 Mar 2026 OMO", dateStr: "2026-03-24" },
-  { value: "26 Mar 2026 NTB", dateStr: "2026-03-26" },
-  { value: "31 Mar 2026 OMO", dateStr: "2026-03-31" },
-  { value: "2 Apr 2026 NTB", dateStr: "2026-04-02" },
-  { value: "7 Apr 2026 OMO", dateStr: "2026-04-07" },
-  { value: "9 Apr 2026 NTB", dateStr: "2026-04-09" },
-  { value: "14 Apr 2026 OMO", dateStr: "2026-04-14" },
-  { value: "16 Apr 2026 NTB", dateStr: "2026-04-16" },
-  { value: "21 Apr 2026 OMO", dateStr: "2026-04-21" },
-  { value: "23 Apr 2026 NTB", dateStr: "2026-04-23" },
-  { value: "28 Apr 2026 OMO", dateStr: "2026-04-28" },
-  { value: "30 Apr 2026 NTB", dateStr: "2026-04-30" },
-  { value: "5 May 2026 OMO", dateStr: "2026-05-05" },
-  { value: "7 May 2026 NTB", dateStr: "2026-05-07" },
-  { value: "12 May 2026 OMO", dateStr: "2026-05-12" },
-  { value: "14 May 2026 NTB", dateStr: "2026-05-14" },
-  { value: "19 May 2026 OMO", dateStr: "2026-05-19" },
-  { value: "21 May 2026 NTB", dateStr: "2026-05-21" },
-  { value: "26 May 2026 OMO", dateStr: "2026-05-26" },
-  { value: "28 May 2026 NTB", dateStr: "2026-05-28" },
-  { value: "2 Jun 2026 OMO", dateStr: "2026-06-02" },
-  { value: "4 Jun 2026 NTB", dateStr: "2026-06-04" },
-  { value: "9 Jun 2026 OMO", dateStr: "2026-06-09" },
-  { value: "11 Jun 2026 NTB", dateStr: "2026-06-11" },
-  { value: "16 Jun 2026 OMO", dateStr: "2026-06-16" },
-  { value: "18 Jun 2026 NTB", dateStr: "2026-06-18" },
-  { value: "23 Jun 2026 OMO", dateStr: "2026-06-23" },
-  { value: "25 Jun 2026 NTB", dateStr: "2026-06-25" },
-  { value: "30 Jun 2026 OMO", dateStr: "2026-06-30" },
-  { value: "2 Jul 2026 NTB", dateStr: "2026-07-02" },
-  { value: "7 Jul 2026 OMO", dateStr: "2026-07-07" },
-  { value: "9 Jul 2026 NTB", dateStr: "2026-07-09" },
-  { value: "14 Jul 2026 OMO", dateStr: "2026-07-14" },
-  { value: "16 Jul 2026 NTB", dateStr: "2026-07-16" },
-  { value: "21 Jul 2026 OMO", dateStr: "2026-07-21" },
-  { value: "23 Jul 2026 NTB", dateStr: "2026-07-23" },
-  { value: "28 Jul 2026 OMO", dateStr: "2026-07-28" },
-  { value: "30 Jul 2026 NTB", dateStr: "2026-07-30" },
-  { value: "4 Aug 2026 OMO", dateStr: "2026-08-04" },
-  { value: "6 Aug 2026 NTB", dateStr: "2026-08-06" },
-  { value: "11 Aug 2026 OMO", dateStr: "2026-08-11" },
-  { value: "13 Aug 2026 NTB", dateStr: "2026-08-13" },
-  { value: "18 Aug 2026 OMO", dateStr: "2026-08-18" },
-  { value: "20 Aug 2026 NTB", dateStr: "2026-08-20" },
-  { value: "25 Aug 2026 OMO", dateStr: "2026-08-25" },
-  { value: "27 Aug 2026 NTB", dateStr: "2026-08-27" },
-  { value: "1 Sep 2026 OMO", dateStr: "2026-09-01" },
-  { value: "3 Sep 2026 NTB", dateStr: "2026-09-03" },
-  { value: "8 Sep 2026 OMO", dateStr: "2026-09-08" },
-  { value: "10 Sep 2026 NTB", dateStr: "2026-09-10" },
-  { value: "15 Sep 2026 OMO", dateStr: "2026-09-15" },
-  { value: "17 Sep 2026 NTB", dateStr: "2026-09-17" },
-  { value: "22 Sep 2026 OMO", dateStr: "2026-09-22" },
-  { value: "24 Sep 2026 NTB", dateStr: "2026-09-24" },
-  { value: "29 Sep 2026 OMO", dateStr: "2026-09-29" },
-  { value: "1 Oct 2026 NTB", dateStr: "2026-10-01" },
-  { value: "6 Oct 2026 OMO", dateStr: "2026-10-06" },
-  { value: "8 Oct 2026 NTB", dateStr: "2026-10-08" },
-  { value: "13 Oct 2026 OMO", dateStr: "2026-10-13" },
-  { value: "15 Oct 2026 NTB", dateStr: "2026-10-15" },
-  { value: "20 Oct 2026 OMO", dateStr: "2026-10-20" },
-  { value: "22 Oct 2026 NTB", dateStr: "2026-10-22" },
-  { value: "27 Oct 2026 OMO", dateStr: "2026-10-27" },
-  { value: "29 Oct 2026 NTB", dateStr: "2026-10-29" },
-  { value: "3 Nov 2026 OMO", dateStr: "2026-11-03" },
-  { value: "5 Nov 2026 NTB", dateStr: "2026-11-05" },
-  { value: "10 Nov 2026 OMO", dateStr: "2026-11-10" },
-  { value: "12 Nov 2026 NTB", dateStr: "2026-11-12" },
-  { value: "17 Nov 2026 OMO", dateStr: "2026-11-17" },
-  { value: "19 Nov 2026 NTB", dateStr: "2026-11-19" },
-  { value: "24 Nov 2026 OMO", dateStr: "2026-11-24" },
-  { value: "26 Nov 2026 NTB", dateStr: "2026-11-26" },
-  { value: "1 Dec 2026 OMO", dateStr: "2026-12-01" },
-  { value: "3 Dec 2026 NTB", dateStr: "2026-12-03" },
-  { value: "8 Dec 2026 OMO", dateStr: "2026-12-08" },
-  { value: "10 Dec 2026 NTB", dateStr: "2026-12-10" },
-  { value: "15 Dec 2026 OMO", dateStr: "2026-12-15" },
-  { value: "17 Dec 2026 NTB", dateStr: "2026-12-17" },
-  { value: "22 Dec 2026 OMO", dateStr: "2026-12-22" },
-  { value: "24 Dec 2026 NTB", dateStr: "2026-12-24" },
-  { value: "29 Dec 2026 OMO", dateStr: "2026-12-29" },
-  { value: "31 Dec 2026 NTB", dateStr: "2026-12-31" },
-];
+const MATURITY_INVENTORY = (() => {
+  const inventory = [];
+  const start = new Date(2025, 0, 1); // Start from Jan 2025
+  const end = new Date();
+  end.setFullYear(end.getFullYear() + 2); // Generate up to 2 years from now
+  
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  
+  let current = new Date(start);
+  while (current <= end) {
+    const dayOfWeek = current.getDay();
+    // OMO maturities are typically on Tuesdays (2)
+    // NTB maturities are typically on Thursdays (4)
+    if (dayOfWeek === 2 || dayOfWeek === 4) {
+      const y = current.getFullYear();
+      const m = String(current.getMonth() + 1).padStart(2, '0');
+      const d = String(current.getDate()).padStart(2, '0');
+      const dateStr = `${y}-${m}-${d}`;
+      
+      const formattedDate = `${current.getDate()} ${months[current.getMonth()]} ${current.getFullYear()}`;
+      const type = dayOfWeek === 2 ? 'OMO' : 'NTB';
+      
+      inventory.push({
+        value: `${formattedDate} ${type}`,
+        dateStr: dateStr
+      });
+    }
+    current.setDate(current.getDate() + 1);
+  }
+  return inventory;
+})();
 
 function isLeapYear(year: number) {
   return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
@@ -197,8 +98,10 @@ export default function App() {
   const filteredMaturities = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const oneYearFromNow = new Date(today);
-    oneYearFromNow.setFullYear(today.getFullYear() + 1);
+    
+    // Maximum 360 days from today as requested
+    const maxDate = new Date(today);
+    maxDate.setDate(today.getDate() + 360);
 
     const searchTokens = tenorText.toLowerCase().trim().split(/\s+/).filter(t => t.length > 0);
     const isSearching = searchTokens.length > 0;
@@ -208,7 +111,7 @@ export default function App() {
       const localMaturityDate = new Date(year, month - 1, day);
 
       if (localMaturityDate < today) return false;
-      if (localMaturityDate > oneYearFromNow) return false;
+      if (localMaturityDate > maxDate) return false;
 
       if (isSearching) {
         const itemWords = item.value.toLowerCase().split(/\s+/);
