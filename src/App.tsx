@@ -399,20 +399,10 @@ export default function App() {
                     disabled
                   />
                 </div>
-                <div>
-                  <label htmlFor="priceCalculated" className="block text-sm font-medium text-gray-700">Price (per ₦100)</label>
-                  <input
-                    type="text"
-                    id="priceCalculated"
-                    value={price}
-                    className="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm"
-                    disabled
-                  />
-                </div>
               </div>
 
               {/* Footer */}
-              <div className="mt-6 pt-4 border-t border-gray-100 text-center">
+              <div className="mt-4 pt-4 border-t border-gray-100 text-center">
                 <p className="text-[10px] text-gray-400 uppercase tracking-widest font-medium">
                   © 2025 All rights reserved. Vega Securities Limited
                 </p>
