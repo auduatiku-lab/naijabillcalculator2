@@ -99,9 +99,9 @@ export default function App() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    // Maximum 360 days from today as requested
+    // Maximum 366 days from today as requested
     const maxDate = new Date(today);
-    maxDate.setDate(today.getDate() + 360);
+    maxDate.setDate(today.getDate() + 366);
 
     const searchTokens = tenorText.toLowerCase().trim().split(/\s+/).filter(t => t.length > 0);
     const isSearching = searchTokens.length > 0;
