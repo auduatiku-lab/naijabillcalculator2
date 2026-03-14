@@ -317,7 +317,14 @@ export default function App() {
                       list="maturities"
                       value={tenorText}
                       onChange={(e) => setTenorText(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && discountRateRef.current?.focus()}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          if (filteredMaturities.length === 1) {
+                            setTenorText(filteredMaturities[0].value);
+                          }
+                          discountRateRef.current?.focus();
+                        }
+                      }}
                       className={`block w-full pl-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
                         tenorText.length > 0 ? 'pr-[140px] md:pr-[225px]' : 'pr-10'
                       }`}
