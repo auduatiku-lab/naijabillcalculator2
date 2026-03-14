@@ -232,8 +232,12 @@ export default function App() {
     const cleanVal = discountRate.replace('%', '');
     const val = parseFloat(cleanVal);
     if (!isNaN(val)) {
-      // Keep up to 6 decimal places, removing unnecessary trailing zeros
-      const formatted = parseFloat(val.toFixed(6)).toString();
+      // Format to at least 2 decimal places, up to 6
+      const formatted = val.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 6,
+        useGrouping: false
+      });
       setDiscountRate(formatted + '%');
     }
   };
