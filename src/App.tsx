@@ -69,6 +69,25 @@ export default function App() {
   const discountRateRef = useRef<HTMLInputElement>(null);
   const settlementDateRef = useRef<HTMLInputElement>(null);
   const considerationRef = useRef<HTMLInputElement>(null);
+  const backspaceHoldRef = useRef<{
+    faceValue: {
+      activeFromEnd: boolean;
+      repeatCount: number;
+      sawRepeatEvent: boolean;
+      mobileDeleteCount: number;
+      lastDeleteTime: number;
+    };
+    consideration: {
+      activeFromEnd: boolean;
+      repeatCount: number;
+      sawRepeatEvent: boolean;
+      mobileDeleteCount: number;
+      lastDeleteTime: number;
+    };
+  }>({
+    faceValue: { activeFromEnd: false, repeatCount: 0, sawRepeatEvent: false, mobileDeleteCount: 0, lastDeleteTime: 0 },
+    consideration: { activeFromEnd: false, repeatCount: 0, sawRepeatEvent: false, mobileDeleteCount: 0, lastDeleteTime: 0 },
+  });
 
   // --- State ---
   const [faceValue, setFaceValue] = useState('');
@@ -278,12 +297,122 @@ export default function App() {
   };
 
   // --- Handlers ---
+  const resetBackspaceHold = (field: 'faceValue' | 'consideration') => {
+    backspaceHoldRef.current[field] = {
+      activeFromEnd: false,
+      repeatCount: 0,
+      sawRepeatEvent: false,
+      mobileDeleteCount: 0,
+      lastDeleteTime: 0,
+    };
+  };
+
+  const handleAmountKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    field: 'faceValue' | 'consideration',
+    setter: React.Dispatch<React.SetStateAction<string>>,
+    onEnter: () => void
+  ) => {
+    if (e.key === 'Enter') {
+      resetBackspaceHold(field);
+      onEnter();
+      return;
+    }
+
+    const state = backspaceHoldRef.current[field];
+    if (e.key === 'Backspace') {
+      const input = e.currentTarget;
+      const isAtEnd =
+        input.value.length > 0 &&
+        input.selectionStart === input.value.length &&
+        input.selectionEnd === input.value.length;
+
+      if (!e.repeat) {
+        state.activeFromEnd = isAtEnd;
+        state.repeatCount = 0;
+        state.sawRepeatEvent = false;
+      } else {
+        state.sawRepeatEvent = true;
+        if (state.activeFromEnd && isAtEnd) {
+          state.repeatCount += 1;
+          // Initial press deletes 1st char, 1st repeat deletes 2nd char, 2nd repeat clears all
+          if (state.repeatCount >= 2) {
+            e.preventDefault();
+            resolveTargetOnEdit(field);
+            setter('');
+            resetBackspaceHold(field);
+          }
+        } else {
+          state.activeFromEnd = false;
+          state.repeatCount = 0;
+        }
+      }
+      return;
+    }
+
+    if (e.key !== 'Unidentified') {
+      resetBackspaceHold(field);
+    }
+  };
+
+  const handleAmountKeyUp = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    field: 'faceValue' | 'consideration'
+  ) => {
+    if (e.key === 'Backspace') {
+      const state = backspaceHoldRef.current[field];
+      state.activeFromEnd = false;
+      state.repeatCount = 0;
+    }
+  };
+
   const handleFormattedAmountInput = (
     e: React.ChangeEvent<HTMLInputElement>,
+    field: 'faceValue' | 'consideration',
+    prevValue: string,
     setter: React.Dispatch<React.SetStateAction<string>>,
     inputRef: React.RefObject<HTMLInputElement | null>
   ) => {
     const val = e.target.value;
+    const state = backspaceHoldRef.current[field];
+    const inputType = (e.nativeEvent as InputEvent | undefined)?.inputType;
+    const isCoarsePointer =
+      typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches;
+
+    if (inputType === 'deleteContentBackward' && !state.sawRepeatEvent && isCoarsePointer) {
+      const prevRaw = prevValue.replace(/[₦,]/g, '');
+      const newRaw = val.replace(/[₦,]/g, '');
+      const cursorAtEnd =
+        e.target.selectionStart === val.length && e.target.selectionEnd === val.length;
+      const deletedFromEnd =
+        cursorAtEnd && newRaw.length > 0 && prevRaw.length > newRaw.length && prevRaw.startsWith(newRaw);
+
+      if (deletedFromEnd) {
+        const now = Date.now();
+        const elapsed = now - state.lastDeleteTime;
+        if (state.mobileDeleteCount === 0) {
+          state.mobileDeleteCount = 1;
+          state.lastDeleteTime = now;
+        } else if (state.mobileDeleteCount === 1 && elapsed <= 750) {
+          state.mobileDeleteCount = 2;
+          state.lastDeleteTime = now;
+        } else if (state.mobileDeleteCount >= 2 && elapsed <= 180) {
+          setter('');
+          resetBackspaceHold(field);
+          return;
+        } else {
+          state.mobileDeleteCount = 1;
+          state.lastDeleteTime = now;
+        }
+      } else {
+        state.mobileDeleteCount = 0;
+        state.lastDeleteTime = 0;
+      }
+    } else if (inputType !== 'deleteContentBackward') {
+      state.mobileDeleteCount = 0;
+      state.lastDeleteTime = 0;
+    }
+
     if (/[kmbne]/i.test(val)) {
       setter(val);
       return;
@@ -328,10 +457,11 @@ export default function App() {
 
   const handleFaceValueInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     resolveTargetOnEdit('faceValue');
-    handleFormattedAmountInput(e, setFaceValue, faceValueRef);
+    handleFormattedAmountInput(e, 'faceValue', faceValue, setFaceValue, faceValueRef);
   };
 
   const handleFaceValueBlur = () => {
+    resetBackspaceHold('faceValue');
     if (targetField === 'faceValue') return;
     const num = parseAmount(faceValue);
     if (!isNaN(num)) {
@@ -341,10 +471,11 @@ export default function App() {
 
   const handleConsiderationInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     resolveTargetOnEdit('consideration');
-    handleFormattedAmountInput(e, setConsideration, considerationRef);
+    handleFormattedAmountInput(e, 'consideration', consideration, setConsideration, considerationRef);
   };
 
   const handleConsiderationBlur = () => {
+    resetBackspaceHold('consideration');
     if (targetField === 'consideration') return;
     const num = parseAmount(consideration);
     if (!isNaN(num)) {
@@ -432,7 +563,8 @@ export default function App() {
                     value={faceValue}
                     onChange={handleFaceValueInput}
                     onBlur={handleFaceValueBlur}
-                    onKeyDown={(e) => e.key === 'Enter' && tenorInputRef.current?.focus()}
+                    onKeyDown={(e) => handleAmountKeyDown(e, 'faceValue', setFaceValue, () => tenorInputRef.current?.focus())}
+                    onKeyUp={(e) => handleAmountKeyUp(e, 'faceValue')}
                     className={`mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
                       targetField === 'faceValue' && faceValue ? 'bg-green-50/60' : 'bg-white'
                     }`}
@@ -549,7 +681,8 @@ export default function App() {
                     value={consideration}
                     onChange={handleConsiderationInput}
                     onBlur={handleConsiderationBlur}
-                    onKeyDown={(e) => e.key === 'Enter' && considerationRef.current?.blur()}
+                    onKeyDown={(e) => handleAmountKeyDown(e, 'consideration', setConsideration, () => considerationRef.current?.blur())}
+                    onKeyUp={(e) => handleAmountKeyUp(e, 'consideration')}
                     className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
                       considerationExceedsFaceValue
                         ? 'bg-white border-red-400 focus:ring-red-500 focus:border-red-500'
