@@ -76,7 +76,7 @@ export default function App() {
   const [discountRate, setDiscountRate] = useState('');
   const [settlementDate, setSettlementDate] = useState('');
   const [settlementDateType, setSettlementDateType] = useState<'text' | 'date'>('text');
-  const [calcMode, setCalcMode] = useState<'discountRate' | 'consideration'>('discountRate');
+  const [targetField, setTargetField] = useState<'faceValue' | 'discountRate' | 'consideration'>('consideration');
 
   // Results / Bidirectional values
   const [consideration, setConsideration] = useState('');
@@ -156,9 +156,9 @@ export default function App() {
 
   const tenorDays = !isNaN(tenorInfo.tenor) ? `${tenorInfo.tenor} Days` : '';
 
-  // --- Forward Calculation: Discount Rate -> Consideration ---
+  // --- Solve for Consideration (from Face Value + Discount Rate) ---
   useEffect(() => {
-    if (calcMode !== 'discountRate') return;
+    if (targetField !== 'consideration') return;
 
     const fvNum = parseAmount(faceValue);
     const drNum = parseFloat(discountRate.replace(/%/g, ''));
@@ -181,11 +181,11 @@ export default function App() {
     setConsideration(purchasePrice.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
     setPrice(`₦${pricePer100.toFixed(6)}`);
     setYieldVal(!isNaN(effectiveYield) ? `${effectiveYield.toFixed(6)}%` : '');
-  }, [calcMode, faceValue, discountRate, tenorInfo]);
+  }, [targetField, faceValue, discountRate, tenorInfo]);
 
-  // --- Reverse Calculation: Consideration -> Discount Rate ---
+  // --- Solve for Discount Rate (from Face Value + Consideration) ---
   useEffect(() => {
-    if (calcMode !== 'consideration') return;
+    if (targetField !== 'discountRate') return;
 
     const fvNum = parseAmount(faceValue);
     const consNum = parseAmount(consideration);
@@ -212,14 +212,70 @@ export default function App() {
     setDiscountRate(`${formattedDr}%`);
     setPrice(`₦${pricePer100.toFixed(6)}`);
     setYieldVal(`${effectiveYield.toFixed(6)}%`);
-  }, [calcMode, faceValue, consideration, tenorInfo]);
+  }, [targetField, faceValue, consideration, tenorInfo]);
+
+  // --- Solve for Face Value (from Consideration + Discount Rate) ---
+  useEffect(() => {
+    if (targetField !== 'faceValue') return;
+
+    const consNum = parseAmount(consideration);
+    const drNum = parseFloat(discountRate.replace(/%/g, ''));
+    const { tenor, daysInYear } = tenorInfo;
+    const priceFactor = 1 - ((drNum / 100) * tenor) / daysInYear;
+
+    if (isNaN(consNum) || isNaN(drNum) || isNaN(tenor) || consNum <= 0 || drNum < 0 || priceFactor <= 0) {
+      setFaceValue('');
+      setYieldVal('');
+      setPrice('');
+      return;
+    }
+
+    const fvNum = consNum / priceFactor;
+    const discountAmount = fvNum - consNum;
+    const effectiveYield = ((discountAmount / consNum) * (daysInYear / tenor)) * 100;
+    const pricePer100 = priceFactor * 100;
+
+    setFaceValue(fvNum.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    setPrice(`₦${pricePer100.toFixed(6)}`);
+    setYieldVal(`${effectiveYield.toFixed(6)}%`);
+  }, [targetField, consideration, discountRate, tenorInfo]);
 
   const considerationExceedsFaceValue = useMemo(() => {
-    if (calcMode !== 'consideration') return false;
+    if (targetField !== 'discountRate') return false;
     const fvNum = parseAmount(faceValue);
     const consNum = parseAmount(consideration);
     return !isNaN(fvNum) && !isNaN(consNum) && fvNum > 0 && consNum > fvNum;
-  }, [calcMode, faceValue, consideration]);
+  }, [targetField, faceValue, consideration]);
+
+  // --- Target Field Resolver ---
+  const resolveTargetOnEdit = (editedField: 'faceValue' | 'discountRate' | 'consideration') => {
+    if (editedField !== targetField) return;
+
+    const hasFaceValue = faceValue.trim() !== '';
+    const hasDiscountRate = discountRate.replace(/%/g, '').trim() !== '';
+    const hasConsideration = consideration.trim() !== '';
+
+    if (editedField === 'consideration') {
+      if (!hasFaceValue && hasDiscountRate) {
+        setTargetField('faceValue');
+      } else {
+        setTargetField('discountRate');
+      }
+    } else if (editedField === 'discountRate') {
+      if (!hasFaceValue && hasConsideration) {
+        setTargetField('faceValue');
+      } else {
+        setTargetField('consideration');
+      }
+    } else {
+      // editedField === 'faceValue'
+      if (!hasDiscountRate && hasConsideration) {
+        setTargetField('discountRate');
+      } else {
+        setTargetField('consideration');
+      }
+    }
+  };
 
   // --- Handlers ---
   const handleFormattedAmountInput = (
@@ -271,10 +327,12 @@ export default function App() {
   };
 
   const handleFaceValueInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    resolveTargetOnEdit('faceValue');
     handleFormattedAmountInput(e, setFaceValue, faceValueRef);
   };
 
   const handleFaceValueBlur = () => {
+    if (targetField === 'faceValue') return;
     const num = parseAmount(faceValue);
     if (!isNaN(num)) {
       setFaceValue(num.toLocaleString('en-US'));
@@ -282,11 +340,12 @@ export default function App() {
   };
 
   const handleConsiderationInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCalcMode('consideration');
+    resolveTargetOnEdit('consideration');
     handleFormattedAmountInput(e, setConsideration, considerationRef);
   };
 
   const handleConsiderationBlur = () => {
+    if (targetField === 'consideration') return;
     const num = parseAmount(consideration);
     if (!isNaN(num)) {
       setConsideration(num.toLocaleString('en-NG', {
@@ -359,7 +418,12 @@ export default function App() {
               <div className="grid grid-cols-1 gap-3">
                 {/* Face Value */}
                 <div>
-                  <label htmlFor="faceValue" className="block text-sm font-medium text-gray-700">Face Value (₦)</label>
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="faceValue" className="block text-sm font-medium text-gray-700">Face Value (₦)</label>
+                    {targetField === 'faceValue' && faceValue && (
+                      <span className="text-xs text-green-700 font-medium">Calculated</span>
+                    )}
+                  </div>
                   <input
                     ref={faceValueRef}
                     type="text"
@@ -369,7 +433,9 @@ export default function App() {
                     onChange={handleFaceValueInput}
                     onBlur={handleFaceValueBlur}
                     onKeyDown={(e) => e.key === 'Enter' && tenorInputRef.current?.focus()}
-                    className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
+                    className={`mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
+                      targetField === 'faceValue' && faceValue ? 'bg-green-50/60' : 'bg-white'
+                    }`}
                     placeholder="e.g., 1b or 1e9 or 1,000,000,000.00"
                   />
                 </div>
@@ -423,7 +489,7 @@ export default function App() {
                 <div>
                   <div className="flex items-center justify-between">
                     <label htmlFor="discountRate" className="block text-sm font-medium text-gray-700">Discount Rate (%)</label>
-                    {calcMode === 'consideration' && discountRate && (
+                    {targetField === 'discountRate' && discountRate && (
                       <span className="text-xs text-green-700 font-medium">Calculated</span>
                     )}
                   </div>
@@ -436,7 +502,7 @@ export default function App() {
                     onChange={(e) => {
                       const val = e.target.value.replace(/%/g, '');
                       if (!isNaN(Number(val)) || val === '' || val === '.') {
-                        setCalcMode('discountRate');
+                        resolveTargetOnEdit('discountRate');
                         setDiscountRate(val);
                       }
                     }}
@@ -444,7 +510,7 @@ export default function App() {
                     onBlur={handleDiscountRateBlur}
                     onKeyDown={(e) => e.key === 'Enter' && settlementDateRef.current?.focus()}
                     className={`mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
-                      calcMode === 'consideration' && discountRate ? 'bg-green-50/60' : 'bg-white'
+                      targetField === 'discountRate' && discountRate ? 'bg-green-50/60' : 'bg-white'
                     }`}
                     placeholder="e.g., 15.3"
                   />
@@ -471,7 +537,7 @@ export default function App() {
                 <div>
                   <div className="flex items-center justify-between">
                     <label htmlFor="considerationCalculated" className="block text-sm font-medium text-gray-700">Consideration (₦)</label>
-                    {calcMode === 'discountRate' && consideration && (
+                    {targetField === 'consideration' && consideration && (
                       <span className="text-xs text-green-700 font-medium">Calculated</span>
                     )}
                   </div>
@@ -487,7 +553,7 @@ export default function App() {
                     className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
                       considerationExceedsFaceValue
                         ? 'bg-white border-red-400 focus:ring-red-500 focus:border-red-500'
-                        : calcMode === 'discountRate' && consideration
+                        : targetField === 'consideration' && consideration
                           ? 'bg-green-50/60 border-gray-300'
                           : 'bg-white border-gray-300'
                     }`}
