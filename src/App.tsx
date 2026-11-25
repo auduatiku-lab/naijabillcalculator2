@@ -725,9 +725,9 @@ export default function App() {
                 {/* Consideration (Bidirectional) */}
                 <div>
                   <div className="flex items-center justify-between">
-                    <label htmlFor="considerationCalculated" className="block text-sm font-medium text-gray-700">Consideration (₦)</label>
+                    <label htmlFor="considerationCalculated" className="block text-sm font-bold text-gray-800">Consideration (₦)</label>
                     {targetField === 'consideration' && consideration && (
-                      <span className="text-xs text-green-700 font-medium">Calculated</span>
+                      <span className="text-xs text-green-700 font-semibold">Calculated</span>
                     )}
                   </div>
                   <input
@@ -740,7 +740,7 @@ export default function App() {
                     onBlur={handleConsiderationBlur}
                     onKeyDown={(e) => handleAmountKeyDown(e, 'consideration', setConsideration, () => considerationRef.current?.blur())}
                     onKeyUp={(e) => handleAmountKeyUp(e, 'consideration')}
-                    className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
+                    className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm font-bold text-gray-900 placeholder:font-normal placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
                       considerationExceedsFaceValue
                         ? 'bg-white border-red-400 focus:ring-red-500 focus:border-red-500'
                         : targetField === 'consideration' && consideration
