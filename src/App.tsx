@@ -4,6 +4,8 @@
  */
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { Copy, Check } from 'lucide-react';
+import { getBillIsin } from './isinRegistry';
 
 // --- Constants & Helpers ---
 const MATURITY_INVENTORY = (() => {
@@ -26,11 +28,13 @@ const MATURITY_INVENTORY = (() => {
       const dateStr = `${y}-${m}-${d}`;
       
       const formattedDate = `${current.getDate()} ${months[current.getMonth()]} ${current.getFullYear()}`;
-      const type = dayOfWeek === 2 ? 'OMO' : 'NTB';
+      const type: 'OMO' | 'NTB' = dayOfWeek === 2 ? 'OMO' : 'NTB';
       
       inventory.push({
         value: `${formattedDate} ${type}`,
-        dateStr: dateStr
+        dateStr: dateStr,
+        type,
+        isin: getBillIsin(dateStr, type),
       });
     }
     current.setDate(current.getDate() + 1);
@@ -101,6 +105,7 @@ export default function App() {
   const [consideration, setConsideration] = useState('');
   const [yieldVal, setYieldVal] = useState('');
   const [, setPrice] = useState('');
+  const [isinCopied, setIsinCopied] = useState(false);
 
   // --- Initialization ---
   useEffect(() => {
@@ -141,10 +146,20 @@ export default function App() {
     });
   }, [tenorText]);
 
+  // --- Selected Maturity & ISIN ---
+  const selectedMaturity = useMemo(
+    () => MATURITY_INVENTORY.find(item => item.value === tenorText),
+    [tenorText]
+  );
+  const selectedIsin = selectedMaturity?.isin ?? '';
+
+  useEffect(() => {
+    setIsinCopied(false);
+  }, [selectedIsin]);
+
   // --- Tenor Calculation ---
   const tenorInfo = useMemo(() => {
-    const selectedItem = MATURITY_INVENTORY.find(item => item.value === tenorText);
-    const maturityDateStr = selectedItem?.dateStr;
+    const maturityDateStr = selectedMaturity?.dateStr;
 
     let tenor = NaN;
     let daysInYear = 365;
@@ -171,7 +186,7 @@ export default function App() {
     }
 
     return { tenor, daysInYear };
-  }, [tenorText, settlementDate]);
+  }, [selectedMaturity, settlementDate]);
 
   const tenorDays = !isNaN(tenorInfo.tenor) ? `${tenorInfo.tenor} Days` : '';
 
@@ -540,6 +555,17 @@ export default function App() {
     tenorInputRef.current?.focus();
   };
 
+  const handleCopyIsin = async () => {
+    if (!selectedIsin) return;
+    try {
+      await navigator.clipboard.writeText(selectedIsin);
+      setIsinCopied(true);
+      setTimeout(() => setIsinCopied(false), 1500);
+    } catch {
+      // Fallback ignored if clipboard permissions are blocked
+    }
+  };
+
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
       <main className="container mx-auto px-4 pb-4 pt-4">
@@ -615,6 +641,37 @@ export default function App() {
                       <option key={idx} value={item.value} />
                     ))}
                   </datalist>
+                </div>
+
+                {/* ISIN Number */}
+                <div>
+                  <label htmlFor="isinNumber" className="block text-sm font-medium text-gray-700">ISIN Number</label>
+                  <div className="relative mt-1">
+                    <input
+                      type="text"
+                      id="isinNumber"
+                      value={selectedIsin}
+                      readOnly
+                      tabIndex={-1}
+                      className="block w-full px-3 py-2 pr-10 bg-gray-100 border border-gray-300 rounded-md shadow-sm font-mono tracking-wide text-gray-800 placeholder-gray-400 focus:outline-none"
+                      placeholder={
+                        selectedMaturity
+                          ? 'No ISIN available for this maturity'
+                          : 'Auto-filled when bill is selected'
+                      }
+                    />
+                    {selectedIsin && (
+                      <button
+                        type="button"
+                        onClick={handleCopyIsin}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded text-gray-500 hover:text-green-700 hover:bg-gray-200/70 transition-colors focus:outline-none"
+                        title={isinCopied ? 'Copied' : 'Copy ISIN'}
+                        aria-label={isinCopied ? 'ISIN copied' : 'Copy ISIN'}
+                      >
+                        {isinCopied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Discount Rate */}
