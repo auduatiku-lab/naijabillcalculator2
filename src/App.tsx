@@ -568,11 +568,11 @@ export default function App() {
 
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
-      <main className="container mx-auto px-4 pb-4 pt-4">
+      <main className="container mx-auto px-4 pt-1.5 pb-2">
         <div className="grid grid-cols-1 justify-items-center">
           <div className="w-full max-w-[28rem]">
-            <div className="bg-white px-4 sm:px-6 py-2.5 rounded-lg shadow-md">
-              <div className="grid grid-cols-1 gap-3">
+            <div className="bg-white px-4 sm:px-6 py-2 rounded-lg shadow-md">
+              <div className="grid grid-cols-1 gap-2">
                 {/* Face Value */}
                 <div>
                   <div className="flex items-center justify-between">
@@ -591,7 +591,7 @@ export default function App() {
                     onBlur={handleFaceValueBlur}
                     onKeyDown={(e) => handleAmountKeyDown(e, 'faceValue', setFaceValue, () => tenorInputRef.current?.focus())}
                     onKeyUp={(e) => handleAmountKeyUp(e, 'faceValue')}
-                    className={`mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
+                    className={`mt-0.5 block w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
                       targetField === 'faceValue' && faceValue ? 'bg-green-50/60' : 'bg-white'
                     }`}
                     placeholder="e.g., 1b or 1e9 or 1,000,000,000.00"
@@ -601,7 +601,7 @@ export default function App() {
                 {/* Tenor / Maturity */}
                 <div>
                   <label htmlFor="tenorInput" className="block text-sm font-medium text-gray-700">Select NTB or OMO maturity</label>
-                  <div className="relative mt-1">
+                  <div className="relative mt-0.5">
                     <input
                       ref={tenorInputRef}
                       type="text"
@@ -617,7 +617,7 @@ export default function App() {
                           discountRateRef.current?.focus();
                         }
                       }}
-                      className={`block w-full pl-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
+                      className={`block w-full pl-3 py-1.5 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
                         tenorText.length > 0 ? 'pr-[140px] md:pr-[225px]' : 'pr-10'
                       }`}
                       placeholder="Type to search for a maturity..."
@@ -646,14 +646,14 @@ export default function App() {
                 {/* ISIN Number */}
                 <div>
                   <label htmlFor="isinNumber" className="block text-sm font-medium text-gray-700">ISIN Number</label>
-                  <div className="relative mt-1">
+                  <div className="relative mt-0.5">
                     <input
                       type="text"
                       id="isinNumber"
                       value={selectedIsin}
                       readOnly
                       tabIndex={-1}
-                      className="block w-full px-3 py-2 pr-10 bg-gray-100 border border-gray-300 rounded-md shadow-sm font-mono tracking-wide text-gray-800 placeholder-gray-400 focus:outline-none"
+                      className="block w-full px-3 py-1.5 pr-10 bg-gray-100 border border-gray-300 rounded-md shadow-sm font-mono tracking-wide text-gray-800 placeholder-gray-400 focus:outline-none"
                       placeholder={
                         selectedMaturity
                           ? 'No ISIN available for this maturity'
@@ -698,7 +698,7 @@ export default function App() {
                     onFocus={handleDiscountRateFocus}
                     onBlur={handleDiscountRateBlur}
                     onKeyDown={(e) => e.key === 'Enter' && settlementDateRef.current?.focus()}
-                    className={`mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
+                    className={`mt-0.5 block w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
                       targetField === 'discountRate' && discountRate ? 'bg-green-50/60' : 'bg-white'
                     }`}
                     placeholder="e.g., 15.3"
@@ -717,7 +717,7 @@ export default function App() {
                     onFocus={handleSettlementFocus}
                     onBlur={handleSettlementBlur}
                     onKeyDown={(e) => e.key === 'Enter' && settlementDateRef.current?.blur()}
-                    className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                    className="mt-0.5 block w-full px-3 py-1.5 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
                     placeholder="dd mmm yyyy"
                   />
                 </div>
@@ -740,7 +740,7 @@ export default function App() {
                     onBlur={handleConsiderationBlur}
                     onKeyDown={(e) => handleAmountKeyDown(e, 'consideration', setConsideration, () => considerationRef.current?.blur())}
                     onKeyUp={(e) => handleAmountKeyUp(e, 'consideration')}
-                    className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm font-bold text-gray-900 placeholder:font-normal placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
+                    className={`mt-0.5 block w-full px-3 py-1.5 border rounded-md shadow-sm font-bold text-gray-900 placeholder:font-normal placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
                       considerationExceedsFaceValue
                         ? 'bg-white border-red-400 focus:ring-red-500 focus:border-red-500'
                         : targetField === 'consideration' && consideration
@@ -761,7 +761,7 @@ export default function App() {
                     type="text"
                     id="yieldCalculated"
                     value={yieldVal}
-                    className="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm"
+                    className="mt-0.5 block w-full px-3 py-1.5 bg-gray-100 border border-gray-300 rounded-md shadow-sm"
                     disabled
                   />
                 </div>
@@ -771,14 +771,14 @@ export default function App() {
                     type="text"
                     id="tenorCalculated"
                     value={tenorDays}
-                    className="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm"
+                    className="mt-0.5 block w-full px-3 py-1.5 bg-gray-100 border border-gray-300 rounded-md shadow-sm"
                     disabled
                   />
                 </div>
               </div>
 
               {/* Footer */}
-              <div className="mt-4 pt-4 border-t border-gray-100 text-center">
+              <div className="mt-2.5 pt-2.5 border-t border-gray-100 text-center">
                 <p className="text-[10px] text-gray-400 uppercase tracking-widest font-medium">
                   © 2025 All rights reserved. Vega Securities Limited
                 </p>
